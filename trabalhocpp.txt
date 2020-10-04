@@ -1,0 +1,312 @@
+// NOMES DOS RESPONSÁVEIS: Victor Dominoni
+//--------------------------------------------------------------
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <malloc.h>
+
+#define MAX_VERTICES 100
+
+// ######### ESCREVA O NROUSP DO PRIMEIRO INTEGRANTE AQUI
+int nroUSP1() {
+    return 8063371;
+}
+
+// ######### ESCREVA O NROUSP DO SEGUNDO INTEGRANTE AQUI (OU DEIXE COM ZERO)
+int  nroUSP2() {
+    return 0;
+}
+
+// ######### ESCREVA O NRO DO GRUPO CADASTRADO
+int grupo() {
+    return 0;
+}
+
+typedef struct {
+	int bot_lin;
+	int bot_col;
+	int exit_lin;
+	int exit_col;
+	int box_col;
+	int key_col;
+	bool haskey;
+} ESTADO;
+
+typedef struct s{
+    int v_pos;
+    char action;
+    struct s* prox;
+}EDGE;
+
+typedef struct {
+    ESTADO state;
+    int pos;
+    EDGE* init;
+}VERTEX;
+
+// funcao principal
+void caminhoValido(ESTADO* s, char* resp);
+
+// funcoes auxiliares
+int is_same_node(ESTADO, ESTADO);
+ESTADO action_function(char, ESTADO, int*);
+ESTADO* create_graph_from_initial_values(ESTADO, int*);
+ESTADO new_state(int, int, int, int, int, int, bool);
+int exit(ESTADO*);
+int grab(ESTADO*);
+int push_right(ESTADO*);
+int push_left(ESTADO*);
+int go_down(ESTADO*);
+int go_up(ESTADO*);
+int walk_right(ESTADO*);
+int walk_left(ESTADO*);
+//------------------------------------------
+// O EP consiste em implementar esta funcao
+// e outras funcoes auxiliares que esta
+// necessitar
+//------------------------------------------
+void caminhoValido(ESTADO* s, char* resp)
+{
+
+
+}
+
+int walk_left(ESTADO* s){
+    int valid = 0;
+    if(s->bot_col > 1){
+       s->bot_col -= 1; 
+       if(s->bot_lin==2){
+           s->bot_lin += 1;
+           valid = 1;
+        }
+    }
+    return valid;
+}
+
+int walk_right(ESTADO* s){
+    int valid = 0;
+    if(s->bot_col < 3){
+       s->bot_col += 1; 
+       if(s->bot_lin==2){
+           s->bot_lin += 1;
+           valid = 1;
+        }
+    }
+    return valid;
+}
+
+int go_up(ESTADO* s){
+    int valid = 0;
+    if(s->bot_col == s->box_col && bot_lin==3){
+        s->bot_lin -= 1;
+       valid = 1;
+    }
+    return valid;
+}
+
+int go_down(ESTADO* s){
+    int valid = 0;
+    if(bot_lin==2){
+        s->bot_lin -= 1;
+        valid = 1;
+    }
+    return valid;
+}
+
+int push_left(ESTADO* s){
+    int valid = 0;
+    if(s->bot_lin==3 && s->bot_col==s->box_col && s->bot_col > 1){
+        s->bot_col -= 1;
+        s->box_col -= 1;
+       valid = 1;
+    }
+    return valid;
+}
+
+int push_right(ESTADO* s){
+    int valid = 0;
+    if(s->bot_lin==3 && s->bot_col==s->box_col && s->bot_col < 1){
+        s->bot_col += 1;
+        s->box_col += 1;
+       valid = 1;
+    }
+    return valid;
+}
+
+int grab(ESTADO* s){
+    int valid = 0;
+    if(s->bot_lin==2 && s->bot_col == s->key_col){
+        s->haskey = True;
+        key_col = 0;
+       valid = 1;
+    }
+    return valid;
+}
+
+int exit(ESTADO* s){
+    int valid = 0;
+    if(s->bot_lin == s_exit_lin && s->haskey && s->bot_col==s->exit_col){
+        print("\nSuccess\n");
+       valid = 1;
+    }
+    return valid;
+}
+ESTADO new_state(int b_l, int b_c, int e_l, int e_c, int x_c, int k_c, bool haskey){
+    ESTADO state;
+    state.bot_lin = b_l;
+    state.bot_col = b_c;
+    state.exit_lin = e_l;
+    state.exit_col = e_c;
+    state.box_col = x_c;
+    state.key_col = k_c;
+    state.haskey = haskey;
+
+    return state;
+}
+
+ESTADO* create_graph_from_initial_values(ESTADO estado_inicial, int* vertex_count){
+    ESTADO* v_list = (ESTADO*) (malloc(sizeof(ESTADO)*MAX_VERTICES);
+    int key_col = estado_inicial.key_col;
+    int exit_col = estado_inicial.exit_col;
+    int exit_lin = estado_inicial.exit_lin;
+    
+    int initial_vertex_pos = -1;
+    int end_vertex_pos = -1;
+    char* action_list = {'l', 'r', 'L', 'R', 'u', 'd', 'g', 'e'};
+    int action_list_len = 8;
+    int count = 0;
+    for(int i = 1; i < 4; i++){//bot x positions
+        for(int j = 2; j < 3; j++){//bot y positions
+            for(int k = 1; k < 4; k++){
+                ESTADO state_without_key = new_state(i, j, exit_lin, exit_col, k, 0, true);
+                VERTEX v;
+                v.state = state_without_key;
+                v.pos = count;
+                v.status = 0;
+                v.first = NULL;
+                v_list[count] = v; 
+                count += 1;
+                ESTADO state_with_key = new_state(i, j, exit_lin, exit_col, k, key_col, false);
+                VERTEX v2;
+                v2.state = state_with_key;
+                v2.pos = count;
+                v2.status = 0;
+                v2.first = NULL;
+                v_list[count] = v2;
+                count += 1;
+            }
+        }
+    }
+
+    vertex_count* = count; 
+    //for vertex in v_list: for action in action_list
+    //use an action and see wich other vertex it gets to in the 
+    //vertices list, if its valid make it its neighbor
+    for(int i = 0; i < count; i++){
+        EDGE* last_edge = (EDGE*) malloc(sizeof(EDGE)); 
+        int first = 0;
+        for(int j = 0; j < action_list_len; j++){
+            //apply action action_list[j] function need new function that chooses a 
+            //function given a char to the current node (v_list[i] and checks
+            //the whole v_list for a resulting node that is the same...
+            int valid;
+            ESTADO neighbor_vertex = action_function(action_list[j], v_list[i], &valid);
+            if(valid == 1){
+               EDGE* new_neighbor; 
+               for(int v_pos = 0; v_pos < *vertex_count; v_pos++){
+                   if(is_same_node(neighbor_vertex, v_list[v_pos])){
+                       new_neighbor->v_pos = v_pos;
+                       new_neighbor->action = action_list[j];
+
+                       if(first != 0){
+                           last_edge->prox = new_neighbor;
+                       }else{
+                           v_list[i].first = new_neighbor;
+                           first = 1;
+                       }
+                       last_edge = new_neighbor;
+                       break;
+                    }
+                }
+            }
+        }
+        last_edge->prox = NULL;
+    }
+
+    return v_list;
+    
+}
+
+ESTADO action_function(char action_char, ESTADO state, int* valid){
+    ESTADO new_vertex = state;
+    switch action_char:
+        case 'l':
+            *valid = walk_left(&new_vertex); 
+            break;
+        case 'r':
+            *valid = walk_right(&new_vertex); 
+            break;
+        case 'L':
+            *valid = push_left(&new_vertex); 
+            break;
+        case 'R':
+            *valid = push_right(&new_vertex); 
+            break;
+        case 'u':
+            *valid = go_up(&new_vertex); 
+            break;
+        case 'd':
+            *valid = go_down(&new_vertex); 
+            break;
+        case 'g':
+            *valid = grab(&new_vertex); 
+            break;
+        case 'e':
+            *valid = exit(&new_vertex); 
+
+            break;
+
+    return new_vertex;
+
+}
+
+int is_same_node(ESTADO s1, ESTADO s2){
+    if(s1.haskey == s2.haskey && s1.bot_col == s2.bot_col &&
+        s1.bot_lin == s2.bot_lin && s1.key_col == s2.key_col &&
+        s1.exit_lin == s2.exit_lin && s1.exit_col == s2.exit_col &&
+        s1.box_col == s2.box_col){
+        return 1;
+    }
+    return 0;
+}
+void show_graph(VERTEX* list, int size){
+    for(int i = 0; i < size; i++){
+        print("\n i: %d, status: %d, b_c: %d, b_l: %d, x_c: %d, k_c: %d, e_l: %d, e_c: %d, has: %d",
+        list[i].pos, list[i].status, list[i].bot_col, list[i].bot_lin, list[i].box_col,
+        list[i].key_col, list[i].exit_col, list[i].exit_lin, list[i].haskey);
+    }
+}
+//---------------------------------------------------------
+// use main() para fazer chamadas de teste ao seu programa
+// mas nao entregue o codido de main() nem inclua nada
+// abaixo deste ponto
+//---------------------------------------------------------
+int main()
+{
+	// exemplo de teste do exemplo 1 da especificacao do EP
+	char* resp = (char*) malloc(sizeof(char)*500);
+	ESTADO* s = (ESTADO*) malloc(sizeof(ESTADO));
+	s->bot_lin=3;  s.bot_col=3;
+	s->exit_lin=3; s.exit_col=3;
+	s->box_col=1;
+	s->key_col=2;
+	s->haskey=false;
+//	caminhoValido(s, resp);
+        ESTADO t = s*;
+        int vertex_count;
+        VERTEX* list;
+       list = create_graph_from_initial_values(t, &vertex_count);
+       show_graph(list, vertex_count);
+
+}
+
